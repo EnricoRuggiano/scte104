@@ -1,10 +1,7 @@
-import * as Protocol from './protocol';
 import * as net from 'net';
 import * as syntax from './syntax';
-import { BitstreamReader, BitstreamWriter } from '@astronautlabs/bitstream';
 import { Observable, Subject } from 'rxjs';
 import { MessageEvent } from './message-event';
-import { dumpReceivingMessage, dumpSendingMessage} from './utils';
 import { logger } from './logger';
 import sleep  = require("sleep-promise");
 import { myBuffer } from './buffer';
@@ -19,8 +16,6 @@ export class Connection
     {
         logger.debug("Server] Handling a new Client connection")
         this.server.connections.push(this);
-        // this.reader = new BitstreamReader();
-        // this.writer = new BitstreamWriter(socket);
 
         // MY BUFFER
         this.buffer = new myBuffer(100);
@@ -34,8 +29,6 @@ export class Connection
         this.handle();
     }
 
-    // private reader : BitstreamReader;
-    // private writer : BitstreamWriter;
     private buffer : myBuffer;
     
     private _messageReceived = new Subject<syntax.Message>();
@@ -45,7 +38,6 @@ export class Connection
 
     async sendMessage(message : syntax.Message) 
     {
-        dumpSendingMessage(message);
         this.socket.write(message.serialize());
     }
 

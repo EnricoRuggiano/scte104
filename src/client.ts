@@ -1,4 +1,3 @@
-import { BitstreamReader, BitstreamWriter } from '@astronautlabs/bitstream';
 import * as net from 'net';
 import { Observable, Subject } from 'rxjs';
 import * as Protocol from './protocol';
@@ -6,7 +5,6 @@ import * as syntax from './syntax';
 import { SingleOperationMessage } from './syntax';
 import { filter, take } from 'rxjs/operators';
 import { logger } from './logger';
-import { dumpMessage, dumpReceivingMessage, dumpSendingMessage } from './utils';
 import { myBuffer } from './buffer';
 import { myDeserializer } from './deserializer';
 import sleep  = require("sleep-promise");
@@ -25,11 +23,7 @@ export class Client
         );
 
         this.socket = net.createConnection({ host, port });
-        //this.reader = new BitstreamReader();
-        //this.writer = new BitstreamWriter(this.socket);
         this.buffer = new myBuffer(100);
-
-        // this.reader.retainBuffers = true;
 
         this.socket.addListener('connect', () => this.resolveConnect());
         this.socket.addListener('error', err => this.rejectConnect(err));
@@ -91,7 +85,6 @@ export class Client
 
     sendMessage(message : syntax.Message) 
     {
-        //dumpSendingMessage(message);
         let buffer = message.serialize()
         logger.debug(`Client] Writing ${Buffer.from(buffer).toString('hex')}`);
         this.socket.write(buffer);
