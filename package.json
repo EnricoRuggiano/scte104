@@ -14,9 +14,10 @@
     "build": "tsc -p .",
     "prepublishOnly": "npm run test",
     "test": "npm run build && node dist/test",
-    "client-example": "npx env-cmd -f .local.env ts-node tests/client.ts",
-    "server-example": "npx env-cmd -f .local.env ts-node tests/server.ts",
-    "client-mk": "npx env-cmd -f .mk.env ts-node tests/client.ts"
+    "client-example": "npx env-cmd -f .local.env ts-node src/examples/client.ts",
+    "server-example": "npx env-cmd -f .local.env ts-node src/examples/server.ts",
+    "client-mk": "npx env-cmd -f .mk.env ts-node src/examples/client.ts",
+    "client-vos": "npx env-cmd -f .vos.env ts-node src/examples/client.ts"
   },
   "repository": {
     "type": "git",
@@ -49,6 +50,7 @@
     "@alterior/command-line": "^3.0.0-rc.5",
     "@alterior/platform-nodejs": "^3.0.2",
     "@astronautlabs/bitstream": "2.0.2",
+    "config": "^4.1.1",
     "rxjs": "^6.6.3",
     "tslog": "4.7.4"
   }

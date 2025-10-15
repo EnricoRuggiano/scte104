@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import 'source-map-support/register';
 import * as SCTE104 from "..";
 import { TIME_TYPE_SMPTE_VITC, TimestampType2 } from '../protocol';

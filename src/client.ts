@@ -9,21 +9,28 @@ import { myBuffer } from './buffer';
 import { myDeserializer } from './deserializer';
 import sleep  = require("sleep-promise");
 
+// Default parameters
+const CFG  = require('config').get('client');
+const BUFFER_SIZE    = parseInt(CFG.get('bufferSize'));
+const MESSAGE_NUMBER = parseInt(CFG.get('messageNumber'));
+const WAIT           = parseInt(CFG.get('wait'));
+
+
 export class Client 
 {
     socket : net.Socket;
-    private messageNumber = 300;
+    private messageNumber = MESSAGE_NUMBER;
 
     async connect(host : string, port = 5167) 
     {
-        logger.debug(`Connecting to ${host}:${port}`)
-        this.messageNumber = Date.now() % 255;
+        logger.info(`Connecting to ${host}:${port}`)
         this.connected = new Promise((resolve, reject) => 
             (this.resolveConnect = resolve, this.rejectConnect = reject)
         );
 
         this.socket = net.createConnection({ host, port });
-        this.buffer = new myBuffer(100);
+        this.buffer = new myBuffer(BUFFER_SIZE);
+        logger.warn(`Client] Buffer size: ${BUFFER_SIZE} bytes. Please consider extend this if you notice any buffer overflow caused by any message`);
 
         this.socket.addListener('connect', () => this.resolveConnect());
         this.socket.addListener('error', err => this.rejectConnect(err));
@@ -62,13 +69,14 @@ export class Client
                 logger.debug(`Trying to deserialize the buffer got: ${buffer.toString('hex')}`);
                 let _message = <syntax.SingleOperationMessage> await myDeserializer.fetch(buffer);
                 logger.info(`CLIENT] Message received: ${Buffer.from(_message.serialize()).toString('hex')}`);                
+                logger.info(`CLIENT] Message result: ${_message.result.toString()}`)
 
                 // clean the buffer
                 this.buffer.clean();
                 this._messageReceived.next(_message);
             }
-            await sleep(5000);
-            logger.info("CLIENT] Waiting to get messages");
+            await sleep(WAIT);
+            logger.debug("CLIENT] Waiting to get messages");
         }
     }
 
@@ -86,7 +94,7 @@ export class Client
     sendMessage(message : syntax.Message) 
     {
         let buffer = message.serialize()
-        logger.debug(`Client] Writing ${Buffer.from(buffer).toString('hex')}`);
+        logger.info(`CLIENT] Message sent: ${Buffer.from(buffer).toString('hex')}`);
         this.socket.write(buffer);
     }
 
@@ -136,8 +144,10 @@ export class Client
     async splice(dpiPidIndex) 
     {
         let now = new Date()
-        let hours = now.getHours()
-        let minutes = now.getMinutes()
+        //now = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds()));
+        now.setSeconds(now.getSeconds())
+        let hours = now.getHours() - 2; 
+        let minutes = now.getMinutes() + 2
         let seconds = now.getSeconds()
 
         return await this.request(
@@ -153,8 +163,8 @@ export class Client
                     new syntax.SpliceRequest().with({
                         opID: Protocol.MOP.SPLICE,
                         spliceInsertType: Protocol.SPLICE_START_NORMAL,
-                        spliceEventId: 1,
-                        uniqueProgramId: 1111,
+                        spliceEventId: 69,
+                        uniqueProgramId: 1,
                         preRollTime: 4000,
                         breakDuration: 2400,
                         availNum: 0,

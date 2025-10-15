@@ -1,5 +1,6 @@
 import * as Protocol from './protocol';
 import * as syntax from './syntax';
+import {logger} from './logger';
 
 export class myDeserializer {
 
@@ -27,7 +28,10 @@ export class myDeserializer {
                 let _tmp = await syntax.GeneralResponse.deserialize(buffer)
                 if (_tmp.result != Protocol.RESULT.SUCCESS)
                 {
-                    throw new Error(`ERROR Message result is not SUCCESS: ${_tmp.toJSON()}`);
+                    logger.error(`Detected a message with Result not Success: ${_tmp.result}`);
+                    logger.error(`Message: ${buffer}`);
+                    logger.error(_tmp);
+                    throw new Error(`SCTE104 Message with result NOT SUCCESS`);
                 }
                 return await syntax.Message.deserialize(buffer);                
             }

@@ -3,9 +3,14 @@ import * as syntax from './syntax';
 import { Observable, Subject } from 'rxjs';
 import { MessageEvent } from './message-event';
 import { logger } from './logger';
-import sleep  = require("sleep-promise");
 import { myBuffer } from './buffer';
 import { myDeserializer } from './deserializer';
+import sleep  = require("sleep-promise");
+
+// Default parameters
+const CFG  = require ('config').get('server');
+const BUFFER_SIZE    = parseInt(CFG.get('bufferSize'));
+const WAIT           = parseInt(CFG.get('wait'));
 
 export class Connection 
 {
@@ -14,11 +19,12 @@ export class Connection
         readonly server : Server
     ) 
     {
-        logger.debug("Server] Handling a new Client connection")
+        logger.debug("SERVER] Handling a new Client connection")
         this.server.connections.push(this);
 
         // MY BUFFER
-        this.buffer = new myBuffer(100);
+        this.buffer = new myBuffer(BUFFER_SIZE);
+        logger.warn(`SERVER] Buffer size: ${BUFFER_SIZE} bytes. Please consider extend this if you notice any buffer overflow caused by any message`);
 
         this.socket.on('data', (data) => 
         {            
@@ -38,7 +44,9 @@ export class Connection
 
     async sendMessage(message : syntax.Message) 
     {
-        this.socket.write(message.serialize());
+        let buffer = message.serialize()
+        logger.info(`SERVER] Message sent: ${Buffer.from(buffer).toString('hex')}`);
+        this.socket.write(buffer);
     }
 
     private async handle() 
@@ -47,27 +55,17 @@ export class Connection
         {
             if (!this.buffer.isEmpty())
             {
-                try
-                {
-                    let buffer = this.buffer.toBuffer();
+                let buffer = this.buffer.toBuffer();
+                logger.debug(`Trying to deserialize the buffer got: ${buffer.toString('hex')}`);
+                let _message = await myDeserializer.fetch(buffer);
+                logger.info(`SERVER] Message received: ${Buffer.from(_message.serialize()).toString('hex')}`);
 
-                    logger.debug(`Trying to deserialize the buffer got: ${buffer.toString('hex')}`);
-                    let _message = await myDeserializer.fetch(buffer);
-                    logger.info(`SERVER] Message received: ${Buffer.from(_message.serialize()).toString('hex')}`);
-
-                    // clean the buffer
-                    this.buffer.clean();
-
-                    this.onMessageReceived(_message);
-                }
-                catch(err)
-                {
-                    logger.error(err);
-                    logger.error("ERROR - Skipping the fetching of the message");
-                }
+                // clean the buffer
+                this.buffer.clean();
+                this.onMessageReceived(_message);
             }
-            await sleep(5000);
-            logger.info("SERVER] Waiting to get messages");
+            await sleep(WAIT);
+            logger.debug("SERVER] Waiting to get messages");
         }
     }
 
@@ -99,13 +97,14 @@ export class Server
     {
         this._server = new net.Server(socket => new Connection(socket, this));
         this._server.listen(port, bind);
+        logger.info(`Listening at ${bind}:${port}`)
     }
 
     close() 
     {
         if (this._server) 
         {
-            logger.info("Server] Closing the server")
+            logger.info("SERVER] Closing the server")
             this._server.close();
             this._server = null;
         }
