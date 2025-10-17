@@ -6,11 +6,12 @@ import { logger } from './logger';
 import { myBuffer } from './buffer';
 import { myDeserializer } from './deserializer';
 import sleep  = require("sleep-promise");
+import { program } from './cli';
 
 // Default parameters
-const CFG  = require ('config').get('server');
-const BUFFER_SIZE    = parseInt(CFG.get('bufferSize'));
-const WAIT           = parseInt(CFG.get('wait'));
+let _args = program.parse(process.argv).opts();
+const BUFFER_SIZE    = _args.bufferSize ?? process.env.bufferSize ?? 100;
+const WAIT           = _args.wait ?? process.env.wait ?? 1000;
 
 export class Connection 
 {
@@ -93,11 +94,11 @@ export class Server
         return this._messageReceived;
     }
 
-    async listen(port: number = 5167, bind: string = '0.0.0.0') 
+    async listen(port: number = 5167, host: string = '0.0.0.0') 
     {
         this._server = new net.Server(socket => new Connection(socket, this));
-        this._server.listen(port, bind);
-        logger.info(`Listening at ${bind}:${port}`)
+        this._server.listen(port, host);
+        logger.info(`Listening at ${host}:${port}`)
     }
 
     close() 
