@@ -3,7 +3,7 @@ import 'zone.js';
 import 'source-map-support/register';
 
 import { suite } from 'razmin';
-import './index';
+import '../src/index';
 
 suite()
     .include(['**/*.test.js'])

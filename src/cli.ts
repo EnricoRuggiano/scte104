@@ -3,8 +3,8 @@ import { Command } from 'commander';
 // const program = new Command();
 //program
 export const program = new Command()
-    .requiredOption('-p, --port <number>', 'server port number')
-    .requiredOption('-h, --host <string>')
+    .option('-p, --port <number>', 'server port number')
+    .option('-h, --host <string>')
     .option('--log-level <string>', 'Log level')
     .option('--dpi-pid-index <number>', 'Dpi Pid index')
     .option('--splice-insert-type <number>', "")
