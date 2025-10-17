@@ -8,7 +8,6 @@ import { logger } from './logger';
 import { myBuffer } from './buffer';
 import { myDeserializer } from './deserializer';
 import sleep  = require("sleep-promise");
-//import * as Params from './_params';
 import * as Args from './args';
 import { program } from './cli';
 
@@ -106,7 +105,6 @@ export class Client
             messageNumber: this.messageNumber++,
             asIndex: 1,
         }));
-    
         return await this.messageReceived
             .pipe(filter(x => x.messageNumber === message.messageNumber))
             .pipe(take(1))
@@ -116,9 +114,6 @@ export class Client
 
     async init(args:Args.Init) 
     {
-        logger.debug("CLIENT] sending Init request with the following args");
-        logger.debug(args)
-
         return await this.request(
             new syntax.InitRequest().with({
                 opID:Protocol.OP.INIT_REQUEST,
@@ -127,29 +122,8 @@ export class Client
         )
     }
 
-    // async alive(dpiPidIndex) 
-    // {
-    //     let epoch = new Date('1980-01-06T00:00:00Z').getTime();
-    //     let elapsed = Date.now() - epoch;
-    //     let seconds = elapsed / 1000 | 0;
-    //     let microseconds = (elapsed - seconds*1000) * 1000;
-
-    //     return await this.request(
-    //         new syntax.AliveRequest().with({
-    //             time: new syntax.Time().with({
-    //                 seconds: seconds, 
-    //                 microseconds: microseconds,
-    //             }),
-    //             opID: Protocol.OP.ALIVE_REQUEST,
-    //             dpiPidIndex:dpiPidIndex
-    //          })
-    //     )
-    // }
-
     async alive(args : Args.Alive) 
     {
-        logger.debug("CLIENT] sending Alive request with the following args");
-        logger.debug(args)
         return await this.request(
             new syntax.AliveRequest().with({
                 time: args.time,
@@ -162,41 +136,6 @@ export class Client
 
     async splice(args : Args.Splice) 
     {
-        logger.debug("CLIENT] sending Splice request with the following args");
-        logger.debug(args)
-
-        // let now = new Date()
-        // //now = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds()));
-        // now.setSeconds(now.getSeconds())
-        // let hours = now.getHours() - 2; 
-        // let minutes = now.getMinutes() + 2
-        // let seconds = now.getSeconds()
-
-        // return await this.request(
-        //     new syntax.MultipleOperationMessage().with({
-        //         dpiPidIndex: dpiPidIndex,
-        //         timestamp: new syntax.SmpteVitcTimestamp().with({
-        //             hours: hours,
-        //             minutes: minutes,
-        //             seconds: seconds,
-        //             frames: 0,
-        //         }),
-        //         operations: [
-        //             new syntax.SpliceRequest().with({
-        //                 opID: Protocol.MOP.SPLICE,
-        //                 spliceInsertType: Protocol.SPLICE_START_NORMAL,
-        //                 spliceEventId: 69,
-        //                 uniqueProgramId: 1,
-        //                 preRollTime: 4000,
-        //                 breakDuration: 2400,
-        //                 availNum: 0,
-        //                 availsExpected: 0,
-        //                 autoReturnFlag: 1
-        //             })
-        //         ]
-        //     })
-        // );
-
         return await this.request(
             new syntax.MultipleOperationMessage().with({
                 dpiPidIndex: args.dpiPidIndex,
@@ -204,14 +143,6 @@ export class Client
                 operations: [
                     new syntax.SpliceRequest().with({
                         opID: Protocol.MOP.SPLICE,
-                        // spliceInsertType: Protocol.SPLICE_START_NORMAL,
-                        // spliceEventId: 69,
-                        // uniqueProgramId: 1,
-                        // preRollTime: 4000,
-                        // breakDuration: 2400,
-                        // availNum: 0,
-                        // availsExpected: 0,
-                        // autoReturnFlag: 1
                         ...args
                     })
                 ]
