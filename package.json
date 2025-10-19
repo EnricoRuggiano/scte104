@@ -42,9 +42,9 @@
     "typescript": "3.9.10"
   },
   "dependencies": {
-    "@alterior/command-line": "3.13.2",
     "@alterior/platform-nodejs": "3.6.4",
     "@astronautlabs/bitstream": "2.0.2",
+    "commander": "14.0.1",
     "rxjs": "6.6.7",
     "sleep-promise": "9.1.0",
     "tslog": "4.7.4"

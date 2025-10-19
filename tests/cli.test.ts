@@ -2,16 +2,12 @@ import 'reflect-metadata';
 import { describe, before, after } from "razmin";
 import * as SCTE104 from "../src";
 import { ServerDefaultCallback, ServerDefaultErrorCallback } from '../src/server-default-callback';
-import program from '../src/cli/program';
-const fs = require("fs");
-import { Command } from 'commander';
 const path = require('path');
-import { exec, execSync, spawnSync } from 'child_process';
-//const { spawn } = require ('child_process');
+import { execSync } from 'child_process';
 
 describe("SCTE-104 Client CLI Tests ", async it => {
     let host:string = "127.0.0.1"
-    let port:number = 5167
+    let port:number = 5169
 
     const getStdout = (buffer:Buffer) => Buffer.from(buffer).toString();
     const cli = (opts=[]) => path.join(__dirname, '..', 'src', 'cli', 'cli.js', ...opts)
@@ -26,7 +22,7 @@ describe("SCTE-104 Client CLI Tests ", async it => {
     before(async() => {
         server = new SCTE104.Server({host:host, port:port});
         server.messageReceived.subscribe(ServerDefaultCallback, ServerDefaultErrorCallback);
-        await server.listen(port, host);
+        server.listen(port, host);
     })
     after(async() => {
         await server.close();
