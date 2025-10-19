@@ -5,14 +5,8 @@ import { MessageEvent } from './message-event';
 import { myBuffer } from './buffer';
 import { myDeserializer } from './deserializer';
 import sleep  = require("sleep-promise");
-import { program } from './cli';
 import * as Args from './args';
 import { logger } from './logger';
-
-// Default parameters
-// let _args = program.parse(process.argv).opts();
-//const BUFFER_SIZE    = 100 //_args.bufferSize ?? process.env.bufferSize ?? 100;
-//const WAIT           = 1000 //_args.wait ?? process.env.wait ?? 1000;
 
 export class Connection 
 {
@@ -87,14 +81,14 @@ export class Server
 
     public host:string;
     public port:number;
-    public wait?:number;
     public logLevel?:string
+    public wait?:number;
     public messageNumber?:number
     public bufferSize?:number
 
-    constructor({host, port, wait, logLevel, messageNumber, bufferSize}:Args.ConfigArgs)
+    constructor({host, port, logLevel, wait=1000, messageNumber=1, bufferSize=1000}:Args.ConfigArgs)
     {
-        Object.assign(this, {host, port, wait, logLevel, messageNumber, bufferSize})
+        Object.assign(this, {host, port, logLevel, wait, messageNumber, bufferSize})
     }
 
     onMessageReceived(event : MessageEvent) 

@@ -1,17 +1,15 @@
 
 import 'reflect-metadata';
-// import prompts from "prompts";
 import { Command, OptionValues } from 'commander';
 import * as SCTE104 from '..';
 import { program as spliceProgram } from './program-splice';
 import { program as aliveProgram }  from './program-alive';
-import { program as initProgram }   from './program-init'; //'./cli-do-init';
+import { program as initProgram }   from './program-init';
 import sleep  = require("sleep-promise");
 import { getLogger } from '../logger';
 
 let client: SCTE104.Client = null;
 let logger = getLogger()
-let opts = null
 
 const program = new Command();
 program
@@ -25,7 +23,6 @@ program
         logger.debug(cmd.opts())
         await connect(cmd.opts())
     })
-    //.command('do <cmds>', { isDefault: true})
     .action( async function (this: Command, cmds:string) {
         let _cmds : string[] = cmds.split(this.opts().sep).filter(Boolean).map(s=>s.trim()) // <splice ....>;<alive>....;
         for (let _cmd of _cmds) {

@@ -8,7 +8,6 @@ import { myBuffer } from './buffer';
 import { myDeserializer } from './deserializer';
 import sleep  = require("sleep-promise");
 import * as Args from './args';
-import { program } from './cli';
 import { logger } from './logger';
 
 export class Client

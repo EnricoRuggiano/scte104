@@ -1,6 +1,6 @@
 {
   "name": "@enricoruggiano/scte104",
-  "version": "1.0.1",
+  "version": "1.0.69",
   "description": "Implementation of the SCTE-104 TCP/IP protocol",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +8,7 @@
     "doc": "docs"
   },
   "bin": {
-    "scte104": "dist/cli.js"
+    "scte104": "dist/cli/cli.js"
   },
   "scripts": {
     "build": "tsc -p .",
@@ -35,19 +35,18 @@
   },
   "homepage": "https://github.com/enricoruggiano/scte104#readme",
   "devDependencies": {
-    "@types/node": "^14.0.4",
-    "env-cmd": "^11.0.0",
-    "razmin": "^1.2.0",
-    "reflect-metadata": "^0.1.13",
-    "source-map-support": "^0.5.16",
-    "typescript": "^3.8.3"
+    "@types/node": "14.0.4",
+    "razmin": "1.2.3",
+    "reflect-metadata": "0.1.14",
+    "source-map-support": "0.5.21",
+    "typescript": "3.9.10"
   },
   "dependencies": {
-    "@alterior/command-line": "^3.0.0-rc.5",
-    "@alterior/platform-nodejs": "^3.0.2",
+    "@alterior/command-line": "3.13.2",
+    "@alterior/platform-nodejs": "3.6.4",
     "@astronautlabs/bitstream": "2.0.2",
-    "rxjs": "^6.6.3",
-    "tslog": "4.7.4",
-    "sleep-promise": "^9.1.0"
+    "rxjs": "6.6.7",
+    "sleep-promise": "9.1.0",
+    "tslog": "4.7.4"
   }
 }

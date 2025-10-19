@@ -7,6 +7,5 @@ import '../src/index';
 
 suite()
     .include(['**/*.test.js'])
-    //.include(['**/client.test.js'])
     .run()
 ;

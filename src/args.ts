@@ -1,6 +1,5 @@
 import * as syntax from './syntax';
 import * as Protocol from './protocol';
-import { exec } from 'child_process';
 
 export interface ConfigArgs {
     host:string;
