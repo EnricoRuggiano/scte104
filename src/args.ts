@@ -2,11 +2,20 @@ import * as syntax from './syntax';
 import * as Protocol from './protocol';
 import { exec } from 'child_process';
 
-export interface GenericArgs {
+export interface ConfigArgs {
+    host:string;
+    port:number;
+    logLevel?:string;
+    bufferSize?:number;
+    wait?:number;
+    messageNumber?:number;
+}
+
+export interface Scte104Args {
     dpiPidIndex:number;
 }
 
-export interface InitArgs extends GenericArgs {}
+export interface InitArgs extends Scte104Args {}
 
 export interface SpliceArgs extends InitArgs {
     spliceInsertType:number;
@@ -19,6 +28,17 @@ export interface SpliceArgs extends InitArgs {
     autoReturnFlag:number;
 }
 
+export class Config implements ConfigArgs {
+    public host:string;
+    public port:number = 5167;
+    public logLevel:string = 'info';
+    public bufferSize:number = 1000;
+    public wait:number = 1000;
+    public messageNumber:number = 1; 
+    public constructor(init?:Partial<Config>) {
+        Object.assign(this, init);
+    }
+}
 
 export class Init implements InitArgs {
     public dpiPidIndex: number = 100;
@@ -60,12 +80,9 @@ export class Splice extends Init implements SpliceArgs {
 
     get _timestamp () : syntax.Timestamp {
         let now = new Date()
-        //now.setSeconds(now.getSeconds())
-        let hours = now.getUTCHours() //- 2; 
-        let minutes = (now.getUTCMinutes() + 2) < 60 ? 
-            (now.getUTCMinutes() + 2):
-             now.getUTCMinutes() ;  
-        let seconds = now.getUTCSeconds()
+        let hours = now.getUTCHours(); 
+        let minutes = now.getUTCMinutes()
+        let seconds = now.getUTCSeconds() + 30
         return new syntax.SmpteVitcTimestamp().with(
         {
             hours: hours,

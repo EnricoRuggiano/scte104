@@ -6,7 +6,7 @@ import { ServerDefaultCallback, ServerDefaultErrorCallback } from '../src/server
 describe("SCTE-104 Client With Local Server", it => {
     let host:string = "127.0.0.1"
     let port:number = 5167
-    let server = new SCTE104.Server();
+    let server = new SCTE104.Server({host:host, port:port});
     server.messageReceived.subscribe(ServerDefaultCallback, ServerDefaultErrorCallback);
     server.listen(port, host);
 
@@ -14,7 +14,7 @@ describe("SCTE-104 Client With Local Server", it => {
     let answer:SCTE104.syntax.SingleOperationMessage = null;
 
     before(async() => {
-        client = new SCTE104.Client();
+        client = new SCTE104.Client(new SCTE104.args.Config({host:host, port:port}));
         await client.connect(host, port);
     })
     after(async() => {

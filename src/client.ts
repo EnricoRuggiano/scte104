@@ -4,23 +4,29 @@ import * as Protocol from './protocol';
 import * as syntax from './syntax';
 import { SingleOperationMessage } from './syntax';
 import { filter, take } from 'rxjs/operators';
-import { logger } from './logger';
 import { myBuffer } from './buffer';
 import { myDeserializer } from './deserializer';
 import sleep  = require("sleep-promise");
 import * as Args from './args';
 import { program } from './cli';
+import { logger } from './logger';
 
-// Default parameters
-let _args = program.parse(process.argv).opts();
-const BUFFER_SIZE    = _args.bufferSize ?? process.env.bufferSize ?? 100;
-const MESSAGE_NUMBER = _args.messageNumber ?? process.env.messageNumber ?? 100;
-const WAIT           = _args.wait ?? process.env.wait ?? 1000;
-
-export class Client 
+export class Client
 {
     socket : net.Socket;
-    private messageNumber = MESSAGE_NUMBER;
+    
+    public host:string;
+    public port:number;
+
+    public wait?:number;
+    public logLevel?:string
+    public messageNumber?:number
+    public bufferSize?:number
+
+    constructor({host, port, wait, logLevel, messageNumber, bufferSize}:Args.ConfigArgs)
+    {
+        Object.assign(this, {host, port, wait, logLevel, messageNumber, bufferSize})
+    }
 
     async connect(host : string, port = 5167) 
     {
@@ -30,8 +36,8 @@ export class Client
         );
 
         this.socket = net.createConnection({ host, port });
-        this.buffer = new myBuffer(BUFFER_SIZE);
-        logger.warn(`Client] Buffer size: ${BUFFER_SIZE} bytes. Please consider extend this if you notice any buffer overflow caused by any message`);
+        this.buffer = new myBuffer(this.bufferSize);
+        logger.warn(`Client] Buffer size: ${this.bufferSize} bytes. Please consider extend this if you notice any buffer overflow caused by any message`);
 
         this.socket.addListener('connect', () => this.resolveConnect());
         this.socket.addListener('error', err => this.rejectConnect(err));
@@ -70,13 +76,18 @@ export class Client
                 logger.debug(`Trying to deserialize the buffer got: ${buffer.toString('hex')}`);
                 let _message = <syntax.SingleOperationMessage> await myDeserializer.fetch(buffer);
                 logger.info(`CLIENT] Message received: ${Buffer.from(_message.serialize()).toString('hex')}`);                
-                logger.info(`CLIENT] Message result: ${_message.result.toString()}`)
+                if (_message.result == Protocol.RESULT.SUCCESS) {
+                    logger.info(`CLIENT] Message result: ${_message.result.toString()} - SUCCESS`)
+                } 
+                else {
+                    logger.error(`CLIENT] Got message without a success: ${_message.result.toString()}`)
+                }
 
                 // clean the buffer
                 this.buffer.clean();
                 this._messageReceived.next(_message);
             }
-            await sleep(WAIT);
+            await sleep(this.wait);
             logger.debug("CLIENT] Waiting to get messages");
         }
     }
@@ -133,7 +144,6 @@ export class Client
         )
     }
 
-
     async splice(args : Args.Splice) 
     {
         return await this.request(
@@ -148,6 +158,5 @@ export class Client
                 ]
             })
         );
-
     }
 }

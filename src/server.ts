@@ -2,16 +2,17 @@ import * as net from 'net';
 import * as syntax from './syntax';
 import { Observable, Subject } from 'rxjs';
 import { MessageEvent } from './message-event';
-import { logger } from './logger';
 import { myBuffer } from './buffer';
 import { myDeserializer } from './deserializer';
 import sleep  = require("sleep-promise");
 import { program } from './cli';
+import * as Args from './args';
+import { logger } from './logger';
 
 // Default parameters
-let _args = program.parse(process.argv).opts();
-const BUFFER_SIZE    = _args.bufferSize ?? process.env.bufferSize ?? 100;
-const WAIT           = _args.wait ?? process.env.wait ?? 1000;
+// let _args = program.parse(process.argv).opts();
+//const BUFFER_SIZE    = 100 //_args.bufferSize ?? process.env.bufferSize ?? 100;
+//const WAIT           = 1000 //_args.wait ?? process.env.wait ?? 1000;
 
 export class Connection 
 {
@@ -24,8 +25,8 @@ export class Connection
         this.server.connections.push(this);
 
         // MY BUFFER
-        this.buffer = new myBuffer(BUFFER_SIZE);
-        logger.warn(`SERVER] Buffer size: ${BUFFER_SIZE} bytes. Please consider extend this if you notice any buffer overflow caused by any message`);
+        this.buffer = new myBuffer(this.server.bufferSize);
+        logger.warn(`SERVER] Buffer size: ${this.server.bufferSize} bytes. Please consider extend this if you notice any buffer overflow caused by any message`);
 
         this.socket.on('data', (data) => 
         {            
@@ -65,7 +66,7 @@ export class Connection
                 this.buffer.clean();
                 this.onMessageReceived(_message);
             }
-            await sleep(WAIT);
+            await sleep(this.server.wait);
             logger.debug("SERVER] Waiting to get messages");
         }
     }
@@ -83,6 +84,18 @@ export class Server
     private _messageReceived = new Subject<MessageEvent>();
 
     public connections : Connection[] = [];
+
+    public host:string;
+    public port:number;
+    public wait?:number;
+    public logLevel?:string
+    public messageNumber?:number
+    public bufferSize?:number
+
+    constructor({host, port, wait, logLevel, messageNumber, bufferSize}:Args.ConfigArgs)
+    {
+        Object.assign(this, {host, port, wait, logLevel, messageNumber, bufferSize})
+    }
 
     onMessageReceived(event : MessageEvent) 
     {

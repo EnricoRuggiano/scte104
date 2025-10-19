@@ -15,7 +15,7 @@ describe("SCTE-104 Client With Remote Server", it => {
         throw Error ("Wrong .local.env file - please create a new one with host, port, dpiPidIndex to run this test");
 
     before(async() => {
-        client = new SCTE104.Client();
+        client = new SCTE104.Client(new SCTE104.args.Config({host:host, port:port}));
         await client.connect(host, port);
         await client.init({dpiPidIndex: dpiPidIndex}) // Mandatory a InitRequest
     })
